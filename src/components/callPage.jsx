@@ -5,10 +5,12 @@ import api from "../api";
 
 const ICE_SERVERS = {
   iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-    // add TURN server here for production
-  ],
+    {
+      urls: "stun:stun.l.google.com:19302"
+    }
+  ]
 };
+
 
 export default function CallPage({ currentUserId, targetUserId }) {
   const localVideoRef = useRef(null);
@@ -79,27 +81,88 @@ export default function CallPage({ currentUserId, targetUserId }) {
     };
   }, [callId, currentUserId]);
 
-  const startLocalStream = async () => {
-    if (localStreamRef.current) return localStreamRef.current;
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false
-     });
-    localStreamRef.current = stream;
-    if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-    return stream;
-  };
+const startLocalStream = async () => {
+  if (localStreamRef.current) return localStreamRef.current;
+
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: true,
+    video: false,
+  });
+
+  localStreamRef.current = stream;
+
+  if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+
+  // 🔊 OUTGOING AUDIO METER
+  try {
+    const audioCtx = new AudioContext();
+    const src = audioCtx.createMediaStreamSource(stream);
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    src.connect(analyser);
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    const meter = () => {
+      analyser.getByteFrequencyData(dataArray);
+      let sum = 0;
+      dataArray.forEach((v) => (sum += v));
+      const level = Math.round(sum / dataArray.length);
+      console.log("📤 OUTGOING AUDIO LEVEL:", level); // <--- Caller audio level
+
+      requestAnimationFrame(meter);
+    };
+    meter();
+  } catch (e) {
+    console.log("Outgoing audio meter failed:", e);
+  }
+
+  return stream;
+};
+
 
   const createPeerConnection = async () => {
     const pc = new RTCPeerConnection(ICE_SERVERS);
     pcRef.current = pc;
 
-    pc.ontrack = (event) => {
-      if (event.streams && event.streams[0]) remoteVideoRef.current.srcObject = event.streams[0];
-      else {
-        const inboundStream = new MediaStream();
-        inboundStream.addTrack(event.track);
-        remoteVideoRef.current.srcObject = inboundStream;
-      }
-    };
+pc.ontrack = (event) => {
+  console.log("🎧 Incoming track", event);
+
+  const stream = event.streams[0];
+  if (remoteVideoRef.current) {
+    remoteVideoRef.current.srcObject = stream;
+  }
+
+  // If this is audio:
+  stream.getAudioTracks().forEach((track) => {
+    console.log("🎙 RECEIVED AUDIO TRACK", track);
+
+    // 🔊 INCOMING AUDIO METER
+    try {
+      const audioCtx = new AudioContext();
+      const src = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      src.connect(analyser);
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+      const meter = () => {
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        dataArray.forEach((v) => (sum += v));
+        const level = Math.round(sum / dataArray.length);
+        console.log("📥 INCOMING AUDIO LEVEL:", level); // <--- Receiver hears this
+
+        requestAnimationFrame(meter);
+      };
+      meter();
+    } catch (e) {
+      console.log("Incoming audio meter failed:", e);
+    }
+  });
+};
+
 
     pc.onicecandidate = (event) => {
       if (event.candidate) sendIceCandidateApi(callId, targetUserId, event.candidate);
