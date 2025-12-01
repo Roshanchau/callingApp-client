@@ -8,7 +8,7 @@ function App() {
   return (
     <>
     {/* current user Id and target user Id */}
-      <CallPage currentUserId={"42a1415b-1ab0-4ff8-826f-d5d6c163dc34"} targetUserId={"4a666546-0c40-4e68-bab1-9eda07b5b81a"}/>
+      <CallPage currentUserId={"8b49e8e4-8639-4cc2-8ebe-21f6c8319fef"} targetUserId={"c418b1ee-33f7-4043-ba18-a7ad368c53cf"}/>
     </>
   )
 }

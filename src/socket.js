@@ -1,7 +1,7 @@
 // src/socket.js
 import { io } from "socket.io-client";
 
-const SOCKET_URL = "http://localhost:3000"; // change to your socket server
+const SOCKET_URL = "https://skilio-customer-test.onrender.com"; // change to your socket server
 
 // we export a singleton socket instance
 export const socket = io(SOCKET_URL, {
