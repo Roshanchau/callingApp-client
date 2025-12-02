@@ -3,34 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { socket, connectSocket } from "../socket";
 import api from "../api";
 import Cookies from "js-cookie";
+import { ICE_SERVERS } from "../ice-candidate";
 
-const ICE_SERVERS = {
-  iceServers: [
-    {
-      urls: "stun:stun.relay.metered.ca:80",
-    },
-    {
-      urls: "turn:global.relay.metered.ca:80",
-      username: "d0dc73ffd06b193670acdc79",
-      credential: "lFvlKr/ArCoGHPzO",
-    },
-    {
-      urls: "turn:global.relay.metered.ca:80?transport=tcp",
-      username: "d0dc73ffd06b193670acdc79",
-      credential: "lFvlKr/ArCoGHPzO",
-    },
-    {
-      urls: "turn:global.relay.metered.ca:443",
-      username: "d0dc73ffd06b193670acdc79",
-      credential: "lFvlKr/ArCoGHPzO",
-    },
-    {
-      urls: "turns:global.relay.metered.ca:443?transport=tcp",
-      username: "d0dc73ffd06b193670acdc79",
-      credential: "lFvlKr/ArCoGHPzO",
-    },
-  ],
-};
+
 
 export default function CallPage() {
   const nickName = Cookies.get("nickName");
