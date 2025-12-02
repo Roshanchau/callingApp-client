@@ -36,7 +36,7 @@ export default function CallPage() {
   const nickName = Cookies.get("nickName");
   console.log(nickName);
   const currentUserId = Cookies.get("profileId");
-  const [targetedUserId, setTargetedUserId] = useState("8b49e8e4-8639-4cc2-8ebe-21f6c8319fef");
+  const [targetedUserId, setTargetedUserId] = useState(null);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
 
