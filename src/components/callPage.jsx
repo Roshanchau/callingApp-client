@@ -110,6 +110,13 @@ export default function CallPage() {
       if (event.candidate) sendIceCandidateApi(callId, event.candidate);
     };
 
+    pc.onconnectionstatechange = () => {
+      console.log("pc.connectionState =", pc.connectionState, "iceConnectionState =", pc.iceConnectionState);
+      if (pc.connectionState === "failed" || pc.iceConnectionState === "failed") {
+        console.warn("PeerConnection failed - you may need TURN or check network");
+      }
+    };
+
     return pc;
   };
 
