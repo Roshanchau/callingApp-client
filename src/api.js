@@ -1,10 +1,12 @@
 // src/api.js
 import axios from "axios";
+import Cookies from "js-cookie";
 
 export const API_BASE = "https://skilio-customer-test.onrender.com/api/v1/call"; // change to your API base
 
 function getAuthToken() {
-  // token here
+  const accessToken = Cookies.get("accessToken");
+  if (accessToken) return accessToken;
   return "";
 }
 
